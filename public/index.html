@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>NewsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;background:#f0f0f0;font-family:'Nunito',sans-serif;}
+
+.phone-shell{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.phone{width:393px;height:852px;background:#fff;border-radius:44px;overflow:hidden;position:relative;box-shadow:0 40px 120px rgba(0,0,0,0.25),0 0 0 10px #1a1a1a,0 0 0 12px #333;}
+@media(max-width:430px){
+  .phone-shell{padding:0;}
+  .phone{width:100vw;height:100vh;border-radius:0;box-shadow:none;}
+}
+
+.screen{position:absolute;inset:0;background:#fff;overflow:hidden;display:flex;flex-direction:column;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s ease;}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none;}
+.screen.slide-left{transform:translateX(-40px);opacity:0;pointer-events:none;}
+
+.status-bar{height:44px;padding:14px 20px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.status-bar .time{font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.status-icons{display:flex;align-items:center;gap:5px;}
+.status-icons svg{width:16px;height:16px;}
+
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;}
+.scroll-area::-webkit-scrollbar{display:none;}
+
+.bottom-nav{height:80px;border-top:1px solid #f0f0f0;display:flex;align-items:flex-start;padding-top:10px;flex-shrink:0;background:#fff;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;}
+.nav-item span{font-size:11px;font-weight:500;color:#999;}
+.nav-item.active span{color:#2bba8a;}
+.nav-item svg{width:22px;height:22px;stroke:#bbb;stroke-width:1.8;fill:none;}
+.nav-item.active svg{stroke:#2bba8a;}
+.nav-home-icon{width:34px;height:34px;background:#2bba8a;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.nav-home-icon svg{stroke:#fff;width:18px;height:18px;}
+
+:root{
+  --green:#2bba8a;
+  --green-light:#e8f8f3;
+  --text:#1a1a1a;
+  --text2:#666;
+  --text3:#999;
+  --border:#f0f0f0;
+  --bg2:#f8f8f8;
+}
+
+/* ── HOME ── */
+.home-header{padding:8px 20px 14px;display:flex;align-items:center;justify-content:space-between;}
+.profile-row{display:flex;align-items:center;gap:12px;}
+.avatar-placeholder{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#c8d6af,#a8c090);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.welcome-txt{font-size:13px;color:var(--text2);}
+.user-name{font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.notif-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;}
+.notif-btn svg{width:20px;height:20px;stroke:#333;stroke-width:1.8;fill:none;}
+.notif-dot{position:absolute;top:9px;right:10px;width:7px;height:7px;background:#ff4757;border-radius:50%;border:1.5px solid #fff;}
+
+.section-hdr{padding:6px 20px 12px;display:flex;align-items:center;justify-content:space-between;}
+.section-title{font-size:19px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.view-all{display:flex;align-items:center;gap:3px;font-size:14px;font-weight:600;color:var(--green);cursor:pointer;}
+.view-all svg{width:16px;height:16px;stroke:var(--green);stroke-width:2.2;fill:none;}
+
+/* Trending cards */
+.trending-scroll{padding:0 20px;display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;}
+.trending-scroll::-webkit-scrollbar{display:none;}
+.trend-card{width:210px;flex-shrink:0;border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+.trend-img{width:210px;height:134px;object-fit:cover;display:block;background:linear-gradient(135deg,#e0e0e0,#c8c8c8);}
+.trend-info{padding:10px 12px 12px;}
+.trend-title{font-size:13.5px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.trend-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.trend-time{font-size:11px;color:var(--text3);}
+.trend-stats{display:flex;align-items:center;gap:10px;}
+.stat{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--text3);font-weight:600;}
+.stat svg{width:12px;height:12px;stroke:var(--text3);stroke-width:1.8;fill:none;}
+.trend-actions{display:flex;align-items:center;gap:10px;}
+.icon-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;}
+.icon-btn svg{width:17px;height:17px;stroke:var(--text3);stroke-width:2;fill:none;}
+
+/* Filter tabs */
+.filter-row{padding:14px 20px 10px;display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-tab{padding:7px 18px;border-radius:20px;font-size:13.5px;font-weight:700;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.filter-tab.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* Article list */
+.article-list{padding:0 20px;}
+.article-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;position:relative;}
+.article-item:last-child{border-bottom:none;}
+.article-text{flex:1;min-width:0;}
+.article-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.article-time{font-size:11px;color:var(--text3);}
+.article-stats{display:flex;align-items:center;gap:12px;justify-content:space-between;}
+.stats-left{display:flex;align-items:center;gap:10px;}
+.article-thumb{width:90px;height:90px;border-radius:12px;object-fit:cover;flex-shrink:0;background:linear-gradient(135deg,#e8e8e8,#d0d0d0);}
+
+/* Page header */
+.page-header{padding:12px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
+.back-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.back-btn svg{width:22px;height:22px;stroke:var(--text);stroke-width:2.2;fill:none;}
+.page-title{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.search-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.search-btn svg{width:22px;height:22px;stroke:var(--text);stroke-width:2;fill:none;}
+
+/* Article detail */
+.article-detail-header{padding:10px 16px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.detail-back{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.detail-back svg{width:22px;height:22px;stroke:var(--text);stroke-width:2.2;fill:none;}
+.detail-actions{display:flex;gap:6px;}
+.detail-action-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.detail-action-btn svg{width:22px;height:22px;stroke:var(--text);stroke-width:1.9;fill:none;}
+.hero-img-wrap{flex-shrink:0;height:220px;overflow:hidden;}
+.hero-img{width:100%;height:220px;object-fit:cover;background:#e0e0e0;}
+.article-body{padding:18px 20px 30px;}
+.article-detail-title{font-size:22px;font-weight:800;color:var(--text);line-height:1.35;letter-spacing:-.4px;margin-bottom:12px;}
+.article-meta-detail{display:flex;align-items:center;gap:12px;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;}
+.meta-chip{font-size:12px;color:var(--text3);}
+.meta-chip.green{color:var(--green);font-weight:600;}
+.meta-divider{width:1px;height:12px;background:var(--border);}
+.article-content{font-size:15px;color:#333;line-height:1.72;font-weight:400;}
+.article-content p{margin-bottom:16px;}
+.read-full-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:10px 20px;background:var(--green);color:#fff;border-radius:24px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;}
+.read-full-btn svg{width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;}
+
+/* Loading & error */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:48px 20px;color:var(--text3);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:48px 20px;text-align:center;}
+.error-state svg{width:40px;height:40px;stroke:#ff6b6b;stroke-width:1.5;fill:none;}
+.error-state p{font-size:14px;color:var(--text2);line-height:1.5;}
+.retry-btn{margin-top:6px;padding:9px 24px;background:var(--green);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+/* Source filter tabs */
+.source-tabs{padding:6px 20px 0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.source-tabs::-webkit-scrollbar{display:none;}
+.source-tab{padding:5px 14px;border-radius:16px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.source-tab.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* Skeleton loader */
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skel-block{border-radius:8px;}
+
+/* Fade in */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.fade-item{opacity:0;animation:fadeUp .3s ease forwards;}
+.fade-item:nth-child(1){animation-delay:.05s;}
+.fade-item:nth-child(2){animation-delay:.1s;}
+.fade-item:nth-child(3){animation-delay:.15s;}
+.fade-item:nth-child(4){animation-delay:.2s;}
+.fade-item:nth-child(5){animation-delay:.25s;}
+.fade-item:nth-child(6){animation-delay:.3s;}
+.fade-item:nth-child(7){animation-delay:.35s;}
+</style>
+</head>
+<body>
+<div class="phone-shell">
+<div class="phone">
+
+<!-- ════ STATUS BAR TEMPLATE ════ -->
+<template id="tpl-statusbar">
+  <div class="status-bar">
+    <span class="time" id="clock">9:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="3" height="7" rx="1"/><rect x="7" y="10" width="3" height="11" rx="1"/><rect x="12" y="6" width="3" height="15" rx="1"/><rect x="17" y="3" width="3" height="18" rx="1" opacity=".3"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 8.5a13 13 0 0 1 21 0M5 12a10 10 0 0 1 14 0M8.5 15.5a6 6 0 0 1 7 0M12 19h.01"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="11" rx="2"/><path d="M22 11v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+</template>
+
+<!-- ════ SCREEN 1 — HOME ════ -->
+<div class="screen" id="screen-home">
+  <div class="status-bar">
+    <span class="time" id="home-clock"></span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="3" height="7" rx="1"/><rect x="7" y="10" width="3" height="11" rx="1"/><rect x="12" y="6" width="3" height="15" rx="1"/><rect x="17" y="3" width="3" height="18" rx="1" opacity=".3"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 8.5a13 13 0 0 1 21 0M5 12a10 10 0 0 1 14 0M8.5 15.5a6 6 0 0 1 7 0M12 19h.01"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="11" rx="2"/><path d="M22 11v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+    <div class="home-header">
+      <div class="profile-row">
+        <div class="avatar-placeholder">👤</div>
+        <div>
+          <div class="welcome-txt">Welcome back 👋</div>
+          <div class="user-name">Kerala News</div>
+        </div>
+      </div>
+      <div class="notif-btn">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+    </div>
+
+    <!-- Trending -->
+    <div class="section-hdr">
+      <span class="section-title">Trending</span>
+      <span class="view-all" onclick="showScreen('screen-trending')">View All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </div>
+    <div class="trending-scroll" id="trending-container">
+      <!-- Skeleton cards -->
+      <div style="width:210px;flex-shrink:0;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <div class="skeleton skel-block" style="width:210px;height:134px;border-radius:0;"></div>
+        <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton skel-block" style="height:14px;width:90%;"></div>
+          <div class="skeleton skel-block" style="height:14px;width:60%;"></div>
+          <div class="skeleton skel-block" style="height:11px;width:40%;"></div>
+        </div>
+      </div>
+      <div style="width:210px;flex-shrink:0;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <div class="skeleton skel-block" style="width:210px;height:134px;border-radius:0;"></div>
+        <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton skel-block" style="height:14px;width:85%;"></div>
+          <div class="skeleton skel-block" style="height:14px;width:55%;"></div>
+          <div class="skeleton skel-block" style="height:11px;width:35%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent -->
+    <div class="section-hdr" style="margin-top:18px;">
+      <span class="section-title">Recent Stories</span>
+      <span class="view-all" onclick="showScreen('screen-recent')">View All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </div>
+
+    <!-- Source filter -->
+    <div class="source-tabs" id="home-source-tabs">
+      <div class="source-tab active" data-src="all" onclick="homeFilter(this)">All</div>
+      <div class="source-tab" data-src="0" onclick="homeFilter(this)">Source 1</div>
+      <div class="source-tab" data-src="1" onclick="homeFilter(this)">Source 2</div>
+      <div class="source-tab" data-src="2" onclick="homeFilter(this)">Source 3</div>
+      <div class="source-tab" data-src="3" onclick="homeFilter(this)">Source 4</div>
+      <div class="source-tab" data-src="4" onclick="homeFilter(this)">Source 5</div>
+    </div>
+
+    <div class="article-list" id="home-article-list">
+      <!-- Skeleton items -->
+      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton skel-block" style="height:14px;width:95%;"></div><div class="skeleton skel-block" style="height:14px;width:80%;"></div><div class="skeleton skel-block" style="height:11px;width:40%;"></div></div><div class="skeleton skel-block" style="width:90px;height:90px;border-radius:12px;flex-shrink:0;"></div></div>
+      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton skel-block" style="height:14px;width:90%;"></div><div class="skeleton skel-block" style="height:14px;width:70%;"></div><div class="skeleton skel-block" style="height:11px;width:35%;"></div></div><div class="skeleton skel-block" style="width:90px;height:90px;border-radius:12px;flex-shrink:0;"></div></div>
+      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton skel-block" style="height:14px;width:88%;"></div><div class="skeleton skel-block" style="height:14px;width:65%;"></div><div class="skeleton skel-block" style="height:11px;width:30%;"></div></div><div class="skeleton skel-block" style="width:90px;height:90px;border-radius:12px;flex-shrink:0;"></div></div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <div class="nav-home-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-recent')">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Recent</span>
+    </div>
+    <div class="nav-item" onclick="showScreen('screen-trending')">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <span>Trending</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </div>
+  </div>
+</div><!-- /screen-home -->
+
+
+<!-- ════ SCREEN 2 — RECENT ════ -->
+<div class="screen hidden" id="screen-recent">
+  <div class="status-bar">
+    <span class="time" id="recent-clock"></span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="3" height="7" rx="1"/><rect x="7" y="10" width="3" height="11" rx="1"/><rect x="12" y="6" width="3" height="15" rx="1"/><rect x="17" y="3" width="3" height="18" rx="1" opacity=".3"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 8.5a13 13 0 0 1 21 0M5 12a10 10 0 0 1 14 0M8.5 15.5a6 6 0 0 1 7 0M12 19h.01"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="11" rx="2"/><path d="M22 11v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="page-header">
+    <div class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <span class="page-title">Recent Stories</span>
+    <div class="search-btn" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+  </div>
+  <div class="source-tabs" id="recent-source-tabs">
+    <div class="source-tab active" data-src="all" onclick="recentFilter(this)">All</div>
+    <div class="source-tab" data-src="0" onclick="recentFilter(this)">Source 1</div>
+    <div class="source-tab" data-src="1" onclick="recentFilter(this)">Source 2</div>
+    <div class="source-tab" data-src="2" onclick="recentFilter(this)">Source 3</div>
+    <div class="source-tab" data-src="3" onclick="recentFilter(this)">Source 4</div>
+    <div class="source-tab" data-src="4" onclick="recentFilter(this)">Source 5</div>
+  </div>
+  <div class="scroll-area">
+    <div class="article-list" id="recent-article-list">
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+
+<!-- ════ SCREEN 3 — TRENDING ════ -->
+<div class="screen hidden" id="screen-trending">
+  <div class="status-bar">
+    <span class="time" id="trending-clock"></span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="3" height="7" rx="1"/><rect x="7" y="10" width="3" height="11" rx="1"/><rect x="12" y="6" width="3" height="15" rx="1"/><rect x="17" y="3" width="3" height="18" rx="1" opacity=".3"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 8.5a13 13 0 0 1 21 0M5 12a10 10 0 0 1 14 0M8.5 15.5a6 6 0 0 1 7 0M12 19h.01"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="11" rx="2"/><path d="M22 11v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="page-header">
+    <div class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <span class="page-title">Trending</span>
+    <div class="search-btn" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+  </div>
+  <div class="scroll-area">
+    <div class="article-list" id="trending-article-list">
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading trending…</span></div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+</div>
+
+
+<!-- ════ SCREEN 4 — ARTICLE DETAIL ════ -->
+<div class="screen hidden" id="screen-article">
+  <div class="status-bar">
+    <span class="time" id="article-clock"></span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="3" height="7" rx="1"/><rect x="7" y="10" width="3" height="11" rx="1"/><rect x="12" y="6" width="3" height="15" rx="1"/><rect x="17" y="3" width="3" height="18" rx="1" opacity=".3"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1.5 8.5a13 13 0 0 1 21 0M5 12a10 10 0 0 1 14 0M8.5 15.5a6 6 0 0 1 7 0M12 19h.01"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="18" height="11" rx="2"/><path d="M22 11v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="article-detail-header">
+    <div class="detail-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div class="detail-actions">
+      <div class="detail-action-btn" id="share-btn" onclick="shareArticle()"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+      <div class="detail-action-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="hero-img-wrap">
+      <img class="hero-img" id="detail-hero-img" src="" alt="" onerror="this.style.display='none'"/>
+    </div>
+    <div class="article-body">
+      <h1 class="article-detail-title" id="detail-title"></h1>
+      <div class="article-meta-detail">
+        <span class="meta-chip" id="detail-time"></span>
+        <div class="meta-divider" id="detail-divider" style="display:none;"></div>
+        <span class="meta-chip" id="detail-readable-time"></span>
+      </div>
+      <div class="article-content" id="detail-summary"></div>
+      <a class="read-full-btn" id="detail-read-link" href="#" target="_blank" rel="noopener">
+        Read Full Article
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SEARCH OVERLAY ════ -->
+<div id="search-overlay" style="position:absolute;inset:0;background:#fff;z-index:200;display:none;flex-direction:column;">
+  <div class="status-bar">
+    <span class="time" id="search-clock"></span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="14" width="3" height="7" rx="1"/><rect x="7" y="10" width="3" height="11" rx="1"/><rect x="12" y="6" width="3" height="15" rx="1"/><rect x="17" y="3" width="3" height="18" rx="1" opacity=".3"/></svg>
+    </div>
+  </div>
+  <div style="padding:10px 16px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--border);">
+    <div style="flex:1;background:var(--bg2);border-radius:12px;display:flex;align-items:center;gap:8px;padding:10px 14px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input" type="text" placeholder="Search news…" style="border:none;background:transparent;font-size:15px;font-family:inherit;flex:1;outline:none;color:var(--text);" oninput="doSearch(this.value)"/>
+    </div>
+    <span onclick="closeSearch()" style="font-size:15px;font-weight:700;color:var(--green);cursor:pointer;">Cancel</span>
+  </div>
+  <div class="scroll-area" id="search-results" style="padding:0 20px;">
+    <div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">Start typing to search…</div>
+  </div>
+</div>
+
+</div><!-- /phone -->
+</div><!-- /phone-shell -->
+
+<script>
+// ════════════════════════════════════════════
+// Clock
+// ════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  document.querySelectorAll('.time').forEach(el => el.textContent = t);
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+// ════════════════════════════════════════════
+// State
+// ════════════════════════════════════════════
+let allArticles = [];
+let homeFilter_src = 'all';
+let recentFilter_src = 'all';
+let currentArticle = null;
+
+// ════════════════════════════════════════════
+// Navigation
+// ════════════════════════════════════════════
+const navHistory = ['screen-home'];
+
+function showScreen(id) {
+  const current = document.querySelector('.screen:not(.hidden):not(.slide-left)');
+  if (current) {
+    current.classList.add('slide-left');
+    setTimeout(() => current.classList.add('hidden'), 320);
+  }
+  const next = document.getElementById(id);
+  next.classList.remove('hidden', 'slide-left');
+  next.querySelectorAll('.fade-item').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+  navHistory.push(id);
+}
+
+function goBack() {
+  if (navHistory.length <= 1) return;
+  const current = document.getElementById(navHistory.pop());
+  current.classList.add('hidden');
+  const prev = document.getElementById(navHistory[navHistory.length - 1]);
+  prev.classList.remove('hidden', 'slide-left');
+}
+
+// Swipe back
+let touchStartX = 0;
+document.querySelector('.phone').addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.querySelector('.phone').addEventListener('touchend', e => {
+  if (e.changedTouches[0].clientX - touchStartX > 60 && touchStartX < 30) goBack();
+}, { passive: true });
+
+// ════════════════════════════════════════════
+// Helpers
+// ════════════════════════════════════════════
+function escH(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function truncate(str, n) {
+  if (!str) return '';
+  return str.length > n ? str.slice(0, n) + '…' : str;
+}
+
+// ════════════════════════════════════════════
+// Article Card Renderers
+// ════════════════════════════════════════════
+function renderTrendCard(a, idx) {
+  const img = a.image
+    ? `<img class="trend-img" src="${escH(a.image)}" alt="" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#ddd,#bbb)';this.removeAttribute('src');"/>`
+    : `<div class="trend-img" style="background:linear-gradient(135deg,#ddd,#bbb);"></div>`;
+
+  return `
+    <div class="trend-card fade-item" onclick="openArticle(${idx})" style="animation-delay:${(idx % 7) * 0.05}s;">
+      ${img}
+      <div class="trend-info">
+        <div class="trend-title">${escH(a.title)}</div>
+        <div class="trend-bottom">
+          <span class="trend-time">${escH(a.timeAgo || a.readableTime || '')}</span>
+          <div class="trend-actions">
+            <div class="icon-btn" onclick="event.stopPropagation();shareItem(${idx})">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderArticleItem(a, idx) {
+  const thumb = a.image
+    ? `<img class="article-thumb" src="${escH(a.image)}" alt="" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#e8e8e8,#d0d0d0)';this.removeAttribute('src');"/>`
+    : `<div class="article-thumb" style="background:linear-gradient(135deg,#e8e8e8,#d0d0d0);"></div>`;
+
+  return `
+    <div class="article-item fade-item" onclick="openArticle(${idx})" style="animation-delay:${(idx % 7) * 0.05}s;">
+      <div class="article-text">
+        <div class="article-title">${escH(a.title)}</div>
+        <div class="article-stats">
+          <span class="article-time">${escH(a.timeAgo || a.readableTime || '')}</span>
+          <div class="trend-actions" style="margin-left:auto;">
+            <div class="icon-btn" onclick="event.stopPropagation();shareItem(${idx})">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      ${thumb}
+    </div>`;
+}
+
+function renderError(containerId, msg) {
+  document.getElementById(containerId).innerHTML = `
+    <div class="error-state">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p>${msg || 'Could not load news. Check your server.'}</p>
+      <button class="retry-btn" onclick="fetchNews()">Try Again</button>
+    </div>`;
+}
+
+// ════════════════════════════════════════════
+// Filter helpers
+// ════════════════════════════════════════════
+// Map channel names to source indices (built after data loads)
+let sourceChannels = []; // e.g. ['Manorama','Asianet','MediaOne','Oneindia','News18 Malayalam']
+
+function filterArticles(src) {
+  if (src === 'all') return allArticles;
+  const idx = parseInt(src, 10);
+  if (isNaN(idx) || !sourceChannels[idx]) return allArticles;
+  const ch = sourceChannels[idx];
+  return allArticles.filter(a => a.channel === ch);
+}
+
+function homeFilter(el) {
+  el.closest('.source-tabs').querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  homeFilter_src = el.dataset.src;
+  renderHomeList();
+}
+
+function recentFilter(el) {
+  el.closest('.source-tabs').querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  recentFilter_src = el.dataset.src;
+  renderRecentList();
+}
+
+function renderHomeList() {
+  const items = filterArticles(homeFilter_src).slice(4, 12); // skip trending 4
+  const list = document.getElementById('home-article-list');
+  if (!items.length) { list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No articles found.</p></div>'; return; }
+  list.innerHTML = items.map((a, i) => renderArticleItem(a, allArticles.indexOf(a))).join('');
+}
+
+function renderRecentList() {
+  const items = filterArticles(recentFilter_src).slice(0, 30);
+  const list = document.getElementById('recent-article-list');
+  if (!items.length) { list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No articles found.</p></div>'; return; }
+  list.innerHTML = items.map((a) => renderArticleItem(a, allArticles.indexOf(a))).join('');
+}
+
+function renderTrendingList() {
+  // top articles with images only, sorted by presence of image
+  const withImg = allArticles.filter(a => a.image);
+  const list = document.getElementById('trending-article-list');
+  if (!withImg.length) { list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No trending articles.</p></div>'; return; }
+  list.innerHTML = withImg.slice(0, 20).map((a) => renderArticleItem(a, allArticles.indexOf(a))).join('');
+}
+
+// ════════════════════════════════════════════
+// Open article detail
+// ════════════════════════════════════════════
+function openArticle(idx) {
+  const a = allArticles[idx];
+  if (!a) return;
+  currentArticle = a;
+
+  // Hero
+  const heroImg = document.getElementById('detail-hero-img');
+  if (a.image) {
+    heroImg.src = a.image;
+    heroImg.style.display = '';
+    document.querySelector('.hero-img-wrap').style.display = '';
+  } else {
+    heroImg.style.display = 'none';
+    document.querySelector('.hero-img-wrap').style.display = 'none';
+  }
+
+  document.getElementById('detail-title').textContent = a.title || '';
+  document.getElementById('detail-time').textContent = a.timeAgo || '';
+  document.getElementById('detail-readable-time').textContent = a.readableTime || '';
+
+  // Show divider only if both values present
+  const div = document.getElementById('detail-divider');
+  if (div) div.style.display = (a.timeAgo && a.readableTime) ? '' : 'none';
+
+  // Summary / content
+  const summaryEl = document.getElementById('detail-summary');
+  summaryEl.innerHTML = a.summary
+    ? `<p>${escH(a.summary)}</p>`
+    : `<p style="color:var(--text3);font-style:italic;">No preview available. Read the full article on the source website.</p>`;
+
+  // Read link
+  const readLink = document.getElementById('detail-read-link');
+  readLink.href = a.link || '#';
+
+  showScreen('screen-article');
+}
+
+// ════════════════════════════════════════════
+// Share
+// ════════════════════════════════════════════
+function shareItem(idx) {
+  const a = allArticles[idx];
+  if (!a) return;
+  if (navigator.share) {
+    navigator.share({ title: a.title, url: a.link }).catch(() => {});
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(a.link || '').then(() => alert('Link copied!'));
+  }
+}
+
+function shareArticle() {
+  if (!currentArticle) return;
+  if (navigator.share) {
+    navigator.share({ title: currentArticle.title, url: currentArticle.link }).catch(() => {});
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(currentArticle.link || '').then(() => alert('Link copied!'));
+  }
+}
+
+// ════════════════════════════════════════════
+// Search
+// ════════════════════════════════════════════
+function openSearch() {
+  const overlay = document.getElementById('search-overlay');
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
+}
+
+function closeSearch() {
+  document.getElementById('search-overlay').style.display = 'none';
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').innerHTML = '<div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">Start typing to search…</div>';
+}
+
+function doSearch(q) {
+  const results = document.getElementById('search-results');
+  q = q.trim().toLowerCase();
+  if (!q) {
+    results.innerHTML = '<div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">Start typing to search…</div>';
+    return;
+  }
+  const matches = allArticles.filter(a => (a.title || '').toLowerCase().includes(q) || (a.summary || '').toLowerCase().includes(q));
+  if (!matches.length) {
+    results.innerHTML = '<div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">No results found.</div>';
+    return;
+  }
+  results.innerHTML = '<div class="article-list">' + matches.slice(0, 20).map((a) => renderArticleItem(a, allArticles.indexOf(a))).join('') + '</div>';
+}
+
+// ════════════════════════════════════════════
+// Fetch from API
+// ════════════════════════════════════════════
+async function fetchNews() {
+  try {
+    // Show loading spinners
+    document.getElementById('home-article-list').innerHTML = `
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>`;
+    document.getElementById('recent-article-list').innerHTML = `
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>`;
+    document.getElementById('trending-article-list').innerHTML = `
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading trending…</span></div>`;
+
+    const res = await fetch('/api/news');
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const data = await res.json();
+
+    if (!data.ok || !Array.isArray(data.articles)) throw new Error('Invalid response from server');
+
+    allArticles = data.articles;
+
+    // Build ordered unique source list (preserves server order)
+    sourceChannels = [];
+    allArticles.forEach(a => {
+      if (a.channel && !sourceChannels.includes(a.channel)) sourceChannels.push(a.channel);
+    });
+
+    // ── Trending cards (first 4 with images)
+    const trendItems = allArticles.filter(a => a.image).slice(0, 4);
+    document.getElementById('trending-container').innerHTML =
+      trendItems.length
+        ? trendItems.map((a, i) => renderTrendCard(a, allArticles.indexOf(a))).join('')
+        : '<div style="padding:20px;color:var(--text3);font-size:14px;">No trending images available.</div>';
+
+    // ── Home list (articles 4-12, source-filtered)
+    renderHomeList();
+
+    // ── Recent list
+    renderRecentList();
+
+    // ── Trending page list
+    renderTrendingList();
+
+  } catch (err) {
+    console.error('fetchNews error:', err);
+    const msg = `Failed to load: ${err.message}`;
+    renderError('home-article-list', msg);
+    renderError('recent-article-list', msg);
+    renderError('trending-article-list', msg);
+    document.getElementById('trending-container').innerHTML = `<div style="padding:20px;color:#ff6b6b;font-size:13px;">${escH(err.message)}</div>`;
+  }
+}
+
+// ════════════════════════════════════════════
+// Auto-refresh every 90 seconds
+// ════════════════════════════════════════════
+fetchNews();
+setInterval(fetchNews, 90000);
+</script>
+</body>
+</html>
