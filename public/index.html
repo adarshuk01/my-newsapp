@@ -2,368 +2,147 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Kerala News</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>NewsApp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;background:#fff;font-family:'Nunito',sans-serif;overflow:hidden;}
+
+.screen{position:absolute;inset:0;background:#fff;overflow:hidden;display:flex;flex-direction:column;transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s ease;}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none;}
+.screen.slide-left{transform:translateX(-40px);opacity:0;pointer-events:none;}
+
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;}
+.scroll-area::-webkit-scrollbar{display:none;}
 
 :root{
   --green:#2bba8a;
   --green-light:#e8f8f3;
-  --green-dark:#1e9e73;
-  --text:#0f1923;
-  --text2:#4a5568;
-  --text3:#94a3b8;
-  --border:#e8edf2;
-  --bg:#f5f7fa;
-  --bg2:#eef1f6;
-  --white:#ffffff;
-  --card-shadow:0 2px 16px rgba(0,0,0,0.07);
-  --card-shadow-hover:0 8px 32px rgba(0,0,0,0.12);
+  --text:#1a1a1a;
+  --text2:#666;
+  --text3:#999;
+  --border:#f0f0f0;
+  --bg2:#f8f8f8;
 }
 
-html,body{
-  width:100%;
-  min-height:100%;
-  background:var(--bg);
-  font-family:'DM Sans',sans-serif;
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-}
+/* ── HOME ── */
+.home-header{padding:16px 20px 14px;display:flex;align-items:center;justify-content:space-between;}
+.profile-row{display:flex;align-items:center;gap:12px;}
+.avatar-placeholder{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#c8d6af,#a8c090);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.welcome-txt{font-size:13px;color:var(--text2);}
+.user-name{font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.notif-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;}
+.notif-btn svg{width:20px;height:20px;stroke:#333;stroke-width:1.8;fill:none;}
+.notif-dot{position:absolute;top:9px;right:10px;width:7px;height:7px;background:#ff4757;border-radius:50%;border:1.5px solid #fff;}
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:#d0d7e0;border-radius:10px;}
+.section-hdr{padding:6px 20px 12px;display:flex;align-items:center;justify-content:space-between;}
+.section-title{font-size:19px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.view-all{display:flex;align-items:center;gap:3px;font-size:14px;font-weight:600;color:var(--green);cursor:pointer;}
+.view-all svg{width:16px;height:16px;stroke:var(--green);stroke-width:2.2;fill:none;}
 
-/* ── Screens ── */
-.screen{
-  display:none;
-  flex-direction:column;
-  min-height:100vh;
-}
-.screen.active{display:flex;}
-
-/* ── Top Header ── */
-.app-header{
-  position:sticky;
-  top:0;
-  z-index:100;
-  background:var(--white);
-  border-bottom:1px solid var(--border);
-  padding:0 20px;
-}
-.app-header-inner{
-  max-width:800px;
-  margin:0 auto;
-  height:60px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.app-logo{
-  display:flex;
-  align-items:center;
-  gap:9px;
-}
-.logo-mark{
-  width:36px;height:36px;
-  background:var(--green);
-  border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-}
-.logo-mark svg{width:18px;height:18px;stroke:#fff;stroke-width:2.3;fill:none;}
-.logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.4px;}
-.logo-text span{color:var(--green);}
-
-.header-right{display:flex;align-items:center;gap:8px;}
-.icon-btn-hdr{
-  width:38px;height:38px;
-  border-radius:50%;
-  border:none;background:transparent;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:background .15s;
-}
-.icon-btn-hdr:hover{background:var(--bg);}
-.icon-btn-hdr svg{width:20px;height:20px;stroke:var(--text2);stroke-width:1.9;fill:none;}
-.notif-wrap{position:relative;}
-.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:#ff4757;border-radius:50%;border:1.5px solid #fff;}
-
-/* ── Nav tabs (top inside screen) ── */
-.screen-header{
-  background:var(--white);
-  padding:0 20px;
-  border-bottom:1px solid var(--border);
-}
-.screen-header-inner{
-  max-width:800px;
-  margin:0 auto;
-  height:50px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.back-btn{
-  width:34px;height:34px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;border-radius:8px;
-  transition:background .15s;
-  flex-shrink:0;
-}
-.back-btn:hover{background:var(--bg);}
-.back-btn svg{width:20px;height:20px;stroke:var(--text);stroke-width:2.2;fill:none;}
-.screen-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px;}
-
-/* ── Content wrapper ── */
-.content{
-  flex:1;
-  max-width:800px;
-  margin:0 auto;
-  width:100%;
-  padding:0 20px 40px;
-}
-
-/* ── Welcome strip ── */
-.welcome-strip{
-  padding:20px 0 4px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.welcome-left{}
-.welcome-greeting{font-size:13px;color:var(--text3);margin-bottom:2px;}
-.welcome-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.5px;}
-
-/* ── Section header ── */
-.section-hdr{
-  padding:22px 0 14px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.section-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px;}
-.view-all{
-  display:flex;align-items:center;gap:3px;
-  font-size:13px;font-weight:600;color:var(--green);
-  cursor:pointer;transition:opacity .15s;
-}
-.view-all:hover{opacity:.75;}
-.view-all svg{width:15px;height:15px;stroke:var(--green);stroke-width:2.3;fill:none;}
-
-/* ── Trending cards (horizontal scroll) ── */
-.trending-outer{margin:0 -20px;}
-.trending-scroll{
-  padding:0 20px 4px;
-  display:flex;gap:14px;
-  overflow-x:auto;scrollbar-width:none;
-}
+/* Trending cards */
+.trending-scroll{padding:0 20px;display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;}
 .trending-scroll::-webkit-scrollbar{display:none;}
-.trend-card{
-  width:220px;flex-shrink:0;
-  border-radius:16px;overflow:hidden;
-  cursor:pointer;
-  background:var(--white);
-  box-shadow:var(--card-shadow);
-  transition:transform .2s,box-shadow .2s;
-}
-.trend-card:hover{transform:translateY(-2px);box-shadow:var(--card-shadow-hover);}
-.trend-img-wrap{width:220px;height:138px;overflow:hidden;background:var(--bg2);}
-.trend-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
-.trend-card:hover .trend-img{transform:scale(1.04);}
-.trend-info{padding:11px 13px 13px;}
-.trend-title{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.45;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.trend-meta{display:flex;align-items:center;justify-content:space-between;}
-.trend-time{font-size:11.5px;color:var(--text3);}
-.trend-share{
-  width:26px;height:26px;border-radius:7px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:background .15s;
-}
-.trend-share:hover{background:var(--bg);}
-.trend-share svg{width:14px;height:14px;stroke:var(--text3);stroke-width:2;fill:none;}
+.trend-card{width:210px;flex-shrink:0;border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+.trend-img{width:210px;height:134px;object-fit:cover;display:block;background:linear-gradient(135deg,#e0e0e0,#c8c8c8);}
+.trend-info{padding:10px 12px 12px;}
+.trend-title{font-size:13.5px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.trend-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.trend-time{font-size:11px;color:var(--text3);}
+.trend-actions{display:flex;align-items:center;gap:10px;}
+.icon-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:6px;}
+.icon-btn svg{width:17px;height:17px;stroke:var(--text3);stroke-width:2;fill:none;}
 
-/* ── Source filter tabs ── */
-.source-tabs{
-  display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
-  padding-bottom:2px;margin-bottom:4px;
-}
-.source-tabs::-webkit-scrollbar{display:none;}
-.source-tab{
-  padding:6px 16px;border-radius:20px;
-  font-size:13px;font-weight:600;
-  border:1.5px solid var(--border);
-  background:var(--white);color:var(--text2);
-  cursor:pointer;white-space:nowrap;
-  transition:all .15s;flex-shrink:0;
-}
-.source-tab:hover{border-color:var(--green);color:var(--green);}
-.source-tab.active{background:var(--green);border-color:var(--green);color:#fff;}
-
-/* ── Article list ── */
-.article-list{padding-top:4px;}
-.article-item{
-  display:flex;align-items:flex-start;gap:13px;
-  padding:15px 0;border-bottom:1px solid var(--border);
-  cursor:pointer;transition:opacity .15s;
-}
-.article-item:hover{opacity:.8;}
+/* Article list */
+.article-list{padding:0 20px;}
+.article-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;position:relative;}
 .article-item:last-child{border-bottom:none;}
 .article-text{flex:1;min-width:0;}
-.article-title{
-  font-size:14.5px;font-weight:600;color:var(--text);
-  line-height:1.45;margin-bottom:9px;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-}
-.article-bottom{display:flex;align-items:center;justify-content:space-between;}
-.article-time{font-size:11.5px;color:var(--text3);}
-.share-sm{
-  width:28px;height:28px;border-radius:7px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:background .15s;
-}
-.share-sm:hover{background:var(--bg2);}
-.share-sm svg{width:14px;height:14px;stroke:var(--text3);stroke-width:2;fill:none;}
-.article-thumb{
-  width:88px;height:88px;border-radius:13px;
-  object-fit:cover;flex-shrink:0;
-  background:var(--bg2);display:block;
-}
-div.article-thumb{background:linear-gradient(135deg,#e8edf2,#d4dce6);}
+.article-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.article-time{font-size:11px;color:var(--text3);}
+.article-stats{display:flex;align-items:center;gap:12px;justify-content:space-between;}
+.stats-left{display:flex;align-items:center;gap:10px;}
+.article-thumb{width:90px;height:90px;border-radius:12px;object-fit:cover;flex-shrink:0;background:linear-gradient(135deg,#e8e8e8,#d0d0d0);}
 
-/* ── Article Detail ── */
-.detail-hero{
-  width:100%;height:260px;
-  overflow:hidden;background:var(--bg2);
-  flex-shrink:0;
-}
-.detail-hero img{width:100%;height:100%;object-fit:cover;display:block;}
-.detail-body{
-  max-width:800px;margin:0 auto;
-  padding:24px 20px 60px;
-}
-.detail-title{
-  font-family:'Syne',sans-serif;
-  font-size:24px;font-weight:800;color:var(--text);
-  line-height:1.32;letter-spacing:-.5px;margin-bottom:14px;
-}
-.detail-meta{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 0 18px;border-bottom:1px solid var(--border);
-  margin-bottom:20px;flex-wrap:wrap;
-}
-.meta-chip{font-size:12.5px;color:var(--text3);}
+/* Page header */
+.page-header{padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
+.back-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.back-btn svg{width:22px;height:22px;stroke:var(--text);stroke-width:2.2;fill:none;}
+.page-title{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.search-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.search-btn svg{width:22px;height:22px;stroke:var(--text);stroke-width:2;fill:none;}
+
+/* Article detail */
+.article-detail-header{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.detail-back{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.detail-back svg{width:22px;height:22px;stroke:var(--text);stroke-width:2.2;fill:none;}
+.detail-actions{display:flex;gap:6px;}
+.detail-action-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.detail-action-btn svg{width:22px;height:22px;stroke:var(--text);stroke-width:1.9;fill:none;}
+.hero-img-wrap{flex-shrink:0;height:220px;overflow:hidden;}
+.hero-img{width:100%;height:220px;object-fit:cover;background:#e0e0e0;}
+.article-body{padding:18px 20px 30px;}
+.article-detail-title{font-size:22px;font-weight:800;color:var(--text);line-height:1.35;letter-spacing:-.4px;margin-bottom:12px;}
+.article-meta-detail{display:flex;align-items:center;gap:12px;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;}
+.meta-chip{font-size:12px;color:var(--text3);}
 .meta-chip.green{color:var(--green);font-weight:600;}
 .meta-divider{width:1px;height:12px;background:var(--border);}
-.detail-content{font-size:15.5px;color:#334155;line-height:1.75;font-weight:400;}
-.detail-content p{margin-bottom:18px;}
-.read-full-btn{
-  display:inline-flex;align-items:center;gap:8px;
-  margin-top:10px;padding:13px 26px;
-  background:var(--green);color:#fff;border-radius:30px;
-  font-size:14px;font-weight:700;text-decoration:none;
-  cursor:pointer;transition:background .15s,transform .15s;
-}
-.read-full-btn:hover{background:var(--green-dark);transform:translateY(-1px);}
-.read-full-btn svg{width:16px;height:16px;stroke:#fff;stroke-width:2.2;fill:none;}
+.article-content{font-size:15px;color:#333;line-height:1.72;font-weight:400;}
+.article-content p{margin-bottom:16px;}
+.read-full-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:10px 20px;background:var(--green);color:#fff;border-radius:24px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;}
+.read-full-btn svg{width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;}
 
-.detail-actions-bar{
-  display:flex;align-items:center;gap:10px;margin-bottom:18px;
-}
-.detail-action-pill{
-  display:flex;align-items:center;gap:6px;
-  padding:8px 16px;border-radius:22px;
-  border:1.5px solid var(--border);
-  background:var(--white);font-size:13px;font-weight:600;
-  color:var(--text2);cursor:pointer;transition:all .15s;
-}
-.detail-action-pill:hover{border-color:var(--green);color:var(--green);}
-.detail-action-pill svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;}
-
-/* ── Search overlay ── */
-#search-overlay{
-  position:fixed;inset:0;
-  background:#fff;z-index:300;
-  display:none;flex-direction:column;
-}
-#search-overlay.open{display:flex;}
-.search-overlay-header{
-  padding:14px 20px;
-  display:flex;gap:10px;align-items:center;
-  border-bottom:1px solid var(--border);
-  background:#fff;
-}
-.search-input-wrap{
-  flex:1;background:var(--bg);border-radius:13px;
-  display:flex;align-items:center;gap:8px;
-  padding:10px 14px;
-}
-.search-input-wrap svg{width:16px;height:16px;stroke:#999;stroke-width:2;fill:none;flex-shrink:0;}
-.search-input-wrap input{
-  border:none;background:transparent;
-  font-size:15px;font-family:inherit;flex:1;outline:none;color:var(--text);
-}
-.cancel-btn{font-size:15px;font-weight:700;color:var(--green);cursor:pointer;white-space:nowrap;}
-.search-scroll{flex:1;overflow-y:auto;padding:0 20px;}
-.search-hint{padding:36px 0;text-align:center;color:var(--text3);font-size:14px;}
-
-/* ── Loading / Error ── */
-.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:60px 20px;color:var(--text3);}
-.spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;}
+/* Loading & error */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:48px 20px;color:var(--text3);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.error-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 20px;text-align:center;}
+.error-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:48px 20px;text-align:center;}
 .error-state svg{width:40px;height:40px;stroke:#ff6b6b;stroke-width:1.5;fill:none;}
-.error-state p{font-size:14px;color:var(--text2);line-height:1.6;max-width:280px;}
-.retry-btn{margin-top:6px;padding:10px 28px;background:var(--green);color:#fff;border:none;border-radius:24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.error-state p{font-size:14px;color:var(--text2);line-height:1.5;}
+.retry-btn{margin-top:6px;padding:9px 24px;background:var(--green);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 
-/* ── Skeleton ── */
-.skeleton{background:linear-gradient(90deg,#eef1f5 25%,#e2e8f0 50%,#eef1f5 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px;}
+/* Source filter tabs */
+.source-tabs{padding:6px 20px 0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.source-tabs::-webkit-scrollbar{display:none;}
+.source-tab{padding:5px 14px;border-radius:16px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.source-tab.active{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* Skeleton loader */
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skel-block{border-radius:8px;}
 
-/* ── Fade in ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+/* Fade in */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 .fade-item{opacity:0;animation:fadeUp .3s ease forwards;}
-.fade-item:nth-child(1){animation-delay:.04s;}
-.fade-item:nth-child(2){animation-delay:.08s;}
-.fade-item:nth-child(3){animation-delay:.12s;}
-.fade-item:nth-child(4){animation-delay:.16s;}
-.fade-item:nth-child(5){animation-delay:.20s;}
-.fade-item:nth-child(6){animation-delay:.24s;}
-.fade-item:nth-child(7){animation-delay:.28s;}
-.fade-item:nth-child(8){animation-delay:.32s;}
+.fade-item:nth-child(1){animation-delay:.05s;}
+.fade-item:nth-child(2){animation-delay:.1s;}
+.fade-item:nth-child(3){animation-delay:.15s;}
+.fade-item:nth-child(4){animation-delay:.2s;}
+.fade-item:nth-child(5){animation-delay:.25s;}
+.fade-item:nth-child(6){animation-delay:.3s;}
+.fade-item:nth-child(7){animation-delay:.35s;}
 </style>
 </head>
 <body>
 
-<!-- ════ SCREEN: HOME ════ -->
-<div class="screen active" id="screen-home">
-
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="app-logo">
-        <div class="logo-mark">
-          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <div class="logo-text">Kerala<span>News</span></div>
-      </div>
-      <div class="header-right">
-        <button class="icon-btn-hdr" onclick="openSearch()">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
-        <div class="notif-wrap">
-          <button class="icon-btn-hdr">
-            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          </button>
-          <div class="notif-dot"></div>
+<!-- ════ SCREEN 1 — HOME ════ -->
+<div class="screen" id="screen-home">
+  <div class="scroll-area">
+    <div class="home-header">
+      <div class="profile-row">
+        <div class="avatar-placeholder">👤</div>
+        <div>
+          <div class="welcome-txt">Welcome back 👋</div>
+          <div class="user-name">Kerala News</div>
         </div>
       </div>
-    </div>
-  </header>
-
-  <div class="content">
-    <div class="welcome-strip">
-      <div class="welcome-left">
-        <div class="welcome-greeting">Welcome back 👋</div>
-        <div class="welcome-name">Kerala News</div>
+      <div class="notif-btn">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
       </div>
     </div>
 
@@ -372,42 +151,32 @@ div.article-thumb{background:linear-gradient(135deg,#e8edf2,#d4dce6);}
       <span class="section-title">Trending</span>
       <span class="view-all" onclick="showScreen('screen-trending')">View All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </div>
-    <div class="trending-outer">
-      <div class="trending-scroll" id="trending-container">
-        <!-- Skeleton -->
-        <div style="width:220px;flex-shrink:0;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,0.07);">
-          <div class="skeleton" style="width:220px;height:138px;border-radius:0;"></div>
-          <div style="padding:11px 13px 13px;display:flex;flex-direction:column;gap:8px;">
-            <div class="skeleton" style="height:13px;width:90%;"></div>
-            <div class="skeleton" style="height:13px;width:65%;"></div>
-            <div class="skeleton" style="height:11px;width:40%;margin-top:4px;"></div>
-          </div>
+    <div class="trending-scroll" id="trending-container">
+      <div style="width:210px;flex-shrink:0;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <div class="skeleton skel-block" style="width:210px;height:134px;border-radius:0;"></div>
+        <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton skel-block" style="height:14px;width:90%;"></div>
+          <div class="skeleton skel-block" style="height:14px;width:60%;"></div>
+          <div class="skeleton skel-block" style="height:11px;width:40%;"></div>
         </div>
-        <div style="width:220px;flex-shrink:0;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,0.07);">
-          <div class="skeleton" style="width:220px;height:138px;border-radius:0;"></div>
-          <div style="padding:11px 13px 13px;display:flex;flex-direction:column;gap:8px;">
-            <div class="skeleton" style="height:13px;width:85%;"></div>
-            <div class="skeleton" style="height:13px;width:55%;"></div>
-            <div class="skeleton" style="height:11px;width:35%;margin-top:4px;"></div>
-          </div>
-        </div>
-        <div style="width:220px;flex-shrink:0;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,0.07);">
-          <div class="skeleton" style="width:220px;height:138px;border-radius:0;"></div>
-          <div style="padding:11px 13px 13px;display:flex;flex-direction:column;gap:8px;">
-            <div class="skeleton" style="height:13px;width:80%;"></div>
-            <div class="skeleton" style="height:13px;width:60%;"></div>
-            <div class="skeleton" style="height:11px;width:38%;margin-top:4px;"></div>
-          </div>
+      </div>
+      <div style="width:210px;flex-shrink:0;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <div class="skeleton skel-block" style="width:210px;height:134px;border-radius:0;"></div>
+        <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton skel-block" style="height:14px;width:85%;"></div>
+          <div class="skeleton skel-block" style="height:14px;width:55%;"></div>
+          <div class="skeleton skel-block" style="height:11px;width:35%;"></div>
         </div>
       </div>
     </div>
 
-    <!-- Recent Stories -->
-    <div class="section-hdr">
+    <!-- Recent -->
+    <div class="section-hdr" style="margin-top:18px;">
       <span class="section-title">Recent Stories</span>
       <span class="view-all" onclick="showScreen('screen-recent')">View All <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
     </div>
 
+    <!-- Source filter -->
     <div class="source-tabs" id="home-source-tabs">
       <div class="source-tab active" data-src="all" onclick="homeFilter(this)">All</div>
       <div class="source-tab" data-src="0" onclick="homeFilter(this)">Source 1</div>
@@ -418,137 +187,97 @@ div.article-thumb{background:linear-gradient(135deg,#e8edf2,#d4dce6);}
     </div>
 
     <div class="article-list" id="home-article-list">
-      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton" style="height:14px;width:95%;"></div><div class="skeleton" style="height:14px;width:78%;"></div><div class="skeleton" style="height:11px;width:38%;margin-top:4px;"></div></div><div class="skeleton" style="width:88px;height:88px;border-radius:13px;flex-shrink:0;"></div></div>
-      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton" style="height:14px;width:90%;"></div><div class="skeleton" style="height:14px;width:70%;"></div><div class="skeleton" style="height:11px;width:33%;margin-top:4px;"></div></div><div class="skeleton" style="width:88px;height:88px;border-radius:13px;flex-shrink:0;"></div></div>
-      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton" style="height:14px;width:86%;"></div><div class="skeleton" style="height:14px;width:65%;"></div><div class="skeleton" style="height:11px;width:30%;margin-top:4px;"></div></div><div class="skeleton" style="width:88px;height:88px;border-radius:13px;flex-shrink:0;"></div></div>
+      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton skel-block" style="height:14px;width:95%;"></div><div class="skeleton skel-block" style="height:14px;width:80%;"></div><div class="skeleton skel-block" style="height:11px;width:40%;"></div></div><div class="skeleton skel-block" style="width:90px;height:90px;border-radius:12px;flex-shrink:0;"></div></div>
+      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton skel-block" style="height:14px;width:90%;"></div><div class="skeleton skel-block" style="height:14px;width:70%;"></div><div class="skeleton skel-block" style="height:11px;width:35%;"></div></div><div class="skeleton skel-block" style="width:90px;height:90px;border-radius:12px;flex-shrink:0;"></div></div>
+      <div class="article-item"><div class="article-text" style="display:flex;flex-direction:column;gap:8px;"><div class="skeleton skel-block" style="height:14px;width:88%;"></div><div class="skeleton skel-block" style="height:14px;width:65%;"></div><div class="skeleton skel-block" style="height:11px;width:30%;"></div></div><div class="skeleton skel-block" style="width:90px;height:90px;border-radius:12px;flex-shrink:0;"></div></div>
     </div>
+    <div style="height:20px;"></div>
   </div>
-</div>
+</div><!-- /screen-home -->
 
 
-<!-- ════ SCREEN: RECENT ════ -->
-<div class="screen" id="screen-recent">
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="app-logo">
-        <div class="logo-mark">
-          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <div class="logo-text">Kerala<span>News</span></div>
-      </div>
-      <div class="header-right">
-        <button class="icon-btn-hdr" onclick="openSearch()">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="screen-header">
-    <div class="screen-header-inner">
-      <div class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <span class="screen-title">Recent Stories</span>
-    </div>
+<!-- ════ SCREEN 2 — RECENT ════ -->
+<div class="screen hidden" id="screen-recent">
+  <div class="page-header">
+    <div class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <span class="page-title">Recent Stories</span>
+    <div class="search-btn" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
   </div>
-
-  <div class="content" style="padding-top:16px;">
-    <div class="source-tabs" id="recent-source-tabs">
-      <div class="source-tab active" data-src="all" onclick="recentFilter(this)">All</div>
-      <div class="source-tab" data-src="0" onclick="recentFilter(this)">Source 1</div>
-      <div class="source-tab" data-src="1" onclick="recentFilter(this)">Source 2</div>
-      <div class="source-tab" data-src="2" onclick="recentFilter(this)">Source 3</div>
-      <div class="source-tab" data-src="3" onclick="recentFilter(this)">Source 4</div>
-      <div class="source-tab" data-src="4" onclick="recentFilter(this)">Source 5</div>
-    </div>
+  <div class="source-tabs" id="recent-source-tabs">
+    <div class="source-tab active" data-src="all" onclick="recentFilter(this)">All</div>
+    <div class="source-tab" data-src="0" onclick="recentFilter(this)">Source 1</div>
+    <div class="source-tab" data-src="1" onclick="recentFilter(this)">Source 2</div>
+    <div class="source-tab" data-src="2" onclick="recentFilter(this)">Source 3</div>
+    <div class="source-tab" data-src="3" onclick="recentFilter(this)">Source 4</div>
+    <div class="source-tab" data-src="4" onclick="recentFilter(this)">Source 5</div>
+  </div>
+  <div class="scroll-area">
     <div class="article-list" id="recent-article-list">
       <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>
     </div>
+    <div style="height:20px;"></div>
   </div>
 </div>
 
 
-<!-- ════ SCREEN: TRENDING ════ -->
-<div class="screen" id="screen-trending">
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="app-logo">
-        <div class="logo-mark">
-          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <div class="logo-text">Kerala<span>News</span></div>
-      </div>
-      <div class="header-right">
-        <button class="icon-btn-hdr" onclick="openSearch()">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="screen-header">
-    <div class="screen-header-inner">
-      <div class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <span class="screen-title">Trending</span>
-    </div>
+<!-- ════ SCREEN 3 — TRENDING ════ -->
+<div class="screen hidden" id="screen-trending">
+  <div class="page-header">
+    <div class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <span class="page-title">Trending</span>
+    <div class="search-btn" onclick="openSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
   </div>
-
-  <div class="content" style="padding-top:16px;">
+  <div class="scroll-area">
     <div class="article-list" id="trending-article-list">
       <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading trending…</span></div>
     </div>
+    <div style="height:20px;"></div>
   </div>
 </div>
 
 
-<!-- ════ SCREEN: ARTICLE DETAIL ════ -->
-<div class="screen" id="screen-article">
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="back-btn" onclick="goBack()" style="margin-left:-8px;">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </div>
-      <div class="header-right">
-        <button class="icon-btn-hdr" onclick="shareArticle()">
-          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        </button>
-      </div>
+<!-- ════ SCREEN 4 — ARTICLE DETAIL ════ -->
+<div class="screen hidden" id="screen-article">
+  <div class="article-detail-header">
+    <div class="detail-back" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+    <div class="detail-actions">
+      <div class="detail-action-btn" id="share-btn" onclick="shareArticle()"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+      <div class="detail-action-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
     </div>
-  </header>
-
-  <div class="detail-hero" id="detail-hero-wrap">
-    <img id="detail-hero-img" src="" alt="" onerror="this.parentElement.style.display='none'"/>
   </div>
-
-  <div class="detail-body">
-    <h1 class="detail-title" id="detail-title"></h1>
-    <div class="detail-meta">
-      <span class="meta-chip" id="detail-time"></span>
-      <div class="meta-divider" id="detail-divider" style="display:none;"></div>
-      <span class="meta-chip green" id="detail-readable-time"></span>
+  <div class="scroll-area">
+    <div class="hero-img-wrap">
+      <img class="hero-img" id="detail-hero-img" src="" alt="" onerror="this.style.display='none'"/>
     </div>
-    <div class="detail-content" id="detail-summary"></div>
-    <a class="read-full-btn" id="detail-read-link" href="#" target="_blank" rel="noopener">
-      Read Full Article
-      <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-    </a>
+    <div class="article-body">
+      <h1 class="article-detail-title" id="detail-title"></h1>
+      <div class="article-meta-detail">
+        <span class="meta-chip" id="detail-time"></span>
+        <div class="meta-divider" id="detail-divider" style="display:none;"></div>
+        <span class="meta-chip" id="detail-readable-time"></span>
+      </div>
+      <div class="article-content" id="detail-summary"></div>
+      <a class="read-full-btn" id="detail-read-link" href="#" target="_blank" rel="noopener">
+        Read Full Article
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
   </div>
 </div>
-
 
 <!-- ════ SEARCH OVERLAY ════ -->
-<div id="search-overlay">
-  <div class="search-overlay-header">
-    <div class="search-input-wrap">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="search-input" type="text" placeholder="Search news…" oninput="doSearch(this.value)" autocomplete="off"/>
+<div id="search-overlay" style="position:absolute;inset:0;background:#fff;z-index:200;display:none;flex-direction:column;">
+  <div style="padding:14px 16px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--border);">
+    <div style="flex:1;background:var(--bg2);border-radius:12px;display:flex;align-items:center;gap:8px;padding:10px 14px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input" type="text" placeholder="Search news…" style="border:none;background:transparent;font-size:15px;font-family:inherit;flex:1;outline:none;color:var(--text);" oninput="doSearch(this.value)"/>
     </div>
-    <span class="cancel-btn" onclick="closeSearch()">Cancel</span>
+    <span onclick="closeSearch()" style="font-size:15px;font-weight:700;color:var(--green);cursor:pointer;">Cancel</span>
   </div>
-  <div class="search-scroll" id="search-results">
-    <div class="search-hint">Start typing to search…</div>
+  <div class="scroll-area" id="search-results" style="padding:0 20px;">
+    <div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">Start typing to search…</div>
   </div>
 </div>
-
 
 <script>
 // ════════════════════════════════════════════
@@ -558,8 +287,42 @@ let allArticles = [];
 let homeFilter_src = 'all';
 let recentFilter_src = 'all';
 let currentArticle = null;
-let sourceChannels = [];
+
+// ════════════════════════════════════════════
+// Navigation
+// ════════════════════════════════════════════
 const navHistory = ['screen-home'];
+
+function showScreen(id) {
+  const current = document.querySelector('.screen:not(.hidden):not(.slide-left)');
+  if (current) {
+    current.classList.add('slide-left');
+    setTimeout(() => current.classList.add('hidden'), 320);
+  }
+  const next = document.getElementById(id);
+  next.classList.remove('hidden', 'slide-left');
+  next.querySelectorAll('.fade-item').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+  navHistory.push(id);
+}
+
+function goBack() {
+  if (navHistory.length <= 1) return;
+  const current = document.getElementById(navHistory.pop());
+  current.classList.add('hidden');
+  const prev = document.getElementById(navHistory[navHistory.length - 1]);
+  prev.classList.remove('hidden', 'slide-left');
+}
+
+// Swipe back
+let touchStartX = 0;
+document.body.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.body.addEventListener('touchend', e => {
+  if (e.changedTouches[0].clientX - touchStartX > 60 && touchStartX < 30) goBack();
+}, { passive: true });
 
 // ════════════════════════════════════════════
 // Helpers
@@ -569,37 +332,24 @@ function escH(s) {
 }
 
 // ════════════════════════════════════════════
-// Navigation
-// ════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
-  if (navHistory[navHistory.length - 1] !== id) navHistory.push(id);
-}
-
-function goBack() {
-  if (navHistory.length <= 1) return;
-  navHistory.pop();
-  showScreen(navHistory[navHistory.length - 1]);
-}
-
-// ════════════════════════════════════════════
-// Renderers
+// Article Card Renderers
 // ════════════════════════════════════════════
 function renderTrendCard(a, idx) {
   const img = a.image
-    ? `<div class="trend-img-wrap"><img class="trend-img" src="${escH(a.image)}" alt="" loading="lazy" onerror="this.parentElement.style.background='var(--bg2)';this.style.display='none';"/></div>`
-    : `<div class="trend-img-wrap"></div>`;
+    ? `<img class="trend-img" src="${escH(a.image)}" alt="" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#ddd,#bbb)';this.removeAttribute('src');"/>`
+    : `<div class="trend-img" style="background:linear-gradient(135deg,#ddd,#bbb);"></div>`;
+
   return `
-    <div class="trend-card fade-item" onclick="openArticle(${idx})">
+    <div class="trend-card fade-item" onclick="openArticle(${idx})" style="animation-delay:${(idx % 7) * 0.05}s;">
       ${img}
       <div class="trend-info">
         <div class="trend-title">${escH(a.title)}</div>
-        <div class="trend-meta">
+        <div class="trend-bottom">
           <span class="trend-time">${escH(a.timeAgo || a.readableTime || '')}</span>
-          <div class="trend-share" onclick="event.stopPropagation();shareItem(${idx})">
-            <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <div class="trend-actions">
+            <div class="icon-btn" onclick="event.stopPropagation();shareItem(${idx})">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -608,16 +358,19 @@ function renderTrendCard(a, idx) {
 
 function renderArticleItem(a, idx) {
   const thumb = a.image
-    ? `<img class="article-thumb" src="${escH(a.image)}" alt="" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#e8edf2,#d4dce6)';this.removeAttribute('src');"/>`
-    : `<div class="article-thumb"></div>`;
+    ? `<img class="article-thumb" src="${escH(a.image)}" alt="" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#e8e8e8,#d0d0d0)';this.removeAttribute('src');"/>`
+    : `<div class="article-thumb" style="background:linear-gradient(135deg,#e8e8e8,#d0d0d0);"></div>`;
+
   return `
-    <div class="article-item fade-item" onclick="openArticle(${idx})">
+    <div class="article-item fade-item" onclick="openArticle(${idx})" style="animation-delay:${(idx % 7) * 0.05}s;">
       <div class="article-text">
         <div class="article-title">${escH(a.title)}</div>
-        <div class="article-bottom">
+        <div class="article-stats">
           <span class="article-time">${escH(a.timeAgo || a.readableTime || '')}</span>
-          <div class="share-sm" onclick="event.stopPropagation();shareItem(${idx})">
-            <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <div class="trend-actions" style="margin-left:auto;">
+            <div class="icon-btn" onclick="event.stopPropagation();shareItem(${idx})">
+              <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -629,7 +382,7 @@ function renderError(containerId, msg) {
   document.getElementById(containerId).innerHTML = `
     <div class="error-state">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <p>${escH(msg || 'Could not load news. Check your server.')}</p>
+      <p>${msg || 'Could not load news. Check your server.'}</p>
       <button class="retry-btn" onclick="fetchNews()">Try Again</button>
     </div>`;
 }
@@ -637,6 +390,8 @@ function renderError(containerId, msg) {
 // ════════════════════════════════════════════
 // Filter helpers
 // ════════════════════════════════════════════
+let sourceChannels = [];
+
 function filterArticles(src) {
   if (src === 'all') return allArticles;
   const idx = parseInt(src, 10);
@@ -662,31 +417,22 @@ function recentFilter(el) {
 function renderHomeList() {
   const items = filterArticles(homeFilter_src).slice(4, 12);
   const list = document.getElementById('home-article-list');
-  if (!items.length) {
-    list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No articles found.</p></div>';
-    return;
-  }
-  list.innerHTML = items.map(a => renderArticleItem(a, allArticles.indexOf(a))).join('');
+  if (!items.length) { list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No articles found.</p></div>'; return; }
+  list.innerHTML = items.map((a) => renderArticleItem(a, allArticles.indexOf(a))).join('');
 }
 
 function renderRecentList() {
   const items = filterArticles(recentFilter_src).slice(0, 30);
   const list = document.getElementById('recent-article-list');
-  if (!items.length) {
-    list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No articles found.</p></div>';
-    return;
-  }
-  list.innerHTML = items.map(a => renderArticleItem(a, allArticles.indexOf(a))).join('');
+  if (!items.length) { list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No articles found.</p></div>'; return; }
+  list.innerHTML = items.map((a) => renderArticleItem(a, allArticles.indexOf(a))).join('');
 }
 
 function renderTrendingList() {
   const withImg = allArticles.filter(a => a.image);
   const list = document.getElementById('trending-article-list');
-  if (!withImg.length) {
-    list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No trending articles.</p></div>';
-    return;
-  }
-  list.innerHTML = withImg.slice(0, 20).map(a => renderArticleItem(a, allArticles.indexOf(a))).join('');
+  if (!withImg.length) { list.innerHTML = '<div class="loading-state"><p style="font-size:14px;color:var(--text3);">No trending articles.</p></div>'; return; }
+  list.innerHTML = withImg.slice(0, 20).map((a) => renderArticleItem(a, allArticles.indexOf(a))).join('');
 }
 
 // ════════════════════════════════════════════
@@ -697,28 +443,30 @@ function openArticle(idx) {
   if (!a) return;
   currentArticle = a;
 
-  const heroWrap = document.getElementById('detail-hero-wrap');
   const heroImg = document.getElementById('detail-hero-img');
   if (a.image) {
     heroImg.src = a.image;
-    heroWrap.style.display = '';
+    heroImg.style.display = '';
+    document.querySelector('.hero-img-wrap').style.display = '';
   } else {
-    heroWrap.style.display = 'none';
+    heroImg.style.display = 'none';
+    document.querySelector('.hero-img-wrap').style.display = 'none';
   }
 
   document.getElementById('detail-title').textContent = a.title || '';
   document.getElementById('detail-time').textContent = a.timeAgo || '';
   document.getElementById('detail-readable-time').textContent = a.readableTime || '';
 
-  const divider = document.getElementById('detail-divider');
-  if (divider) divider.style.display = (a.timeAgo && a.readableTime) ? '' : 'none';
+  const div = document.getElementById('detail-divider');
+  if (div) div.style.display = (a.timeAgo && a.readableTime) ? '' : 'none';
 
   const summaryEl = document.getElementById('detail-summary');
   summaryEl.innerHTML = a.summary
     ? `<p>${escH(a.summary)}</p>`
     : `<p style="color:var(--text3);font-style:italic;">No preview available. Read the full article on the source website.</p>`;
 
-  document.getElementById('detail-read-link').href = a.link || '#';
+  const readLink = document.getElementById('detail-read-link');
+  readLink.href = a.link || '#';
 
   showScreen('screen-article');
 }
@@ -749,31 +497,31 @@ function shareArticle() {
 // Search
 // ════════════════════════════════════════════
 function openSearch() {
-  document.getElementById('search-overlay').classList.add('open');
+  const overlay = document.getElementById('search-overlay');
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
   setTimeout(() => document.getElementById('search-input').focus(), 100);
 }
 
 function closeSearch() {
-  document.getElementById('search-overlay').classList.remove('open');
+  document.getElementById('search-overlay').style.display = 'none';
   document.getElementById('search-input').value = '';
-  document.getElementById('search-results').innerHTML = '<div class="search-hint">Start typing to search…</div>';
+  document.getElementById('search-results').innerHTML = '<div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">Start typing to search…</div>';
 }
 
 function doSearch(q) {
   const results = document.getElementById('search-results');
   q = q.trim().toLowerCase();
   if (!q) {
-    results.innerHTML = '<div class="search-hint">Start typing to search…</div>';
+    results.innerHTML = '<div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">Start typing to search…</div>';
     return;
   }
-  const matches = allArticles.filter(a =>
-    (a.title || '').toLowerCase().includes(q) || (a.summary || '').toLowerCase().includes(q)
-  );
+  const matches = allArticles.filter(a => (a.title || '').toLowerCase().includes(q) || (a.summary || '').toLowerCase().includes(q));
   if (!matches.length) {
-    results.innerHTML = '<div class="search-hint">No results found.</div>';
+    results.innerHTML = '<div style="padding:30px 0;text-align:center;color:var(--text3);font-size:14px;">No results found.</div>';
     return;
   }
-  results.innerHTML = '<div class="article-list">' + matches.slice(0, 20).map(a => renderArticleItem(a, allArticles.indexOf(a))).join('') + '</div>';
+  results.innerHTML = '<div class="article-list">' + matches.slice(0, 20).map((a) => renderArticleItem(a, allArticles.indexOf(a))).join('') + '</div>';
 }
 
 // ════════════════════════════════════════════
@@ -781,41 +529,31 @@ function doSearch(q) {
 // ════════════════════════════════════════════
 async function fetchNews() {
   try {
-    document.getElementById('home-article-list').innerHTML = `<div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>`;
-    document.getElementById('recent-article-list').innerHTML = `<div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>`;
-    document.getElementById('trending-article-list').innerHTML = `<div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading trending…</span></div>`;
+    document.getElementById('home-article-list').innerHTML = `
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>`;
+    document.getElementById('recent-article-list').innerHTML = `
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading news…</span></div>`;
+    document.getElementById('trending-article-list').innerHTML = `
+      <div class="loading-state"><div class="spinner"></div><span style="font-size:14px;">Loading trending…</span></div>`;
 
     const res = await fetch('/api/news');
     if (!res.ok) throw new Error(`Server error ${res.status}`);
     const data = await res.json();
+
     if (!data.ok || !Array.isArray(data.articles)) throw new Error('Invalid response from server');
 
     allArticles = data.articles;
 
-    // Build unique source channels list
     sourceChannels = [];
     allArticles.forEach(a => {
       if (a.channel && !sourceChannels.includes(a.channel)) sourceChannels.push(a.channel);
     });
 
-    // Update source tab labels
-    ['home-source-tabs', 'recent-source-tabs'].forEach(tabsId => {
-      const tabs = document.getElementById(tabsId);
-      if (!tabs) return;
-      const srcTabs = tabs.querySelectorAll('[data-src]');
-      srcTabs.forEach(tab => {
-        const src = tab.dataset.src;
-        if (src === 'all') return;
-        const idx = parseInt(src, 10);
-        if (!isNaN(idx) && sourceChannels[idx]) tab.textContent = sourceChannels[idx];
-      });
-    });
-
-    // Trending cards (first 4 with images)
     const trendItems = allArticles.filter(a => a.image).slice(0, 4);
-    document.getElementById('trending-container').innerHTML = trendItems.length
-      ? trendItems.map((a, i) => renderTrendCard(a, allArticles.indexOf(a))).join('')
-      : '<div style="padding:20px;color:var(--text3);font-size:14px;">No trending images available.</div>';
+    document.getElementById('trending-container').innerHTML =
+      trendItems.length
+        ? trendItems.map((a, i) => renderTrendCard(a, allArticles.indexOf(a))).join('')
+        : '<div style="padding:20px;color:var(--text3);font-size:14px;">No trending images available.</div>';
 
     renderHomeList();
     renderRecentList();
@@ -831,7 +569,6 @@ async function fetchNews() {
   }
 }
 
-// Auto-refresh every 90 seconds
 fetchNews();
 setInterval(fetchNews, 90000);
 </script>
