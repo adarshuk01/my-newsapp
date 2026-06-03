@@ -356,9 +356,7 @@ app.get("/api/news/source/:source", async (req, res) => {
 
 app.get("/api/health", (req, res) => res.json({ ok: true, message: "Kerala News API running" }));
 
-// Catch-all → serve frontend
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/index.html"));
-});
+
+module.exports = app;
 
 
